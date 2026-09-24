@@ -1,0 +1,27 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Large Datasets & Archives
+brats20-dataset-training-validation.zip
+BraTS2020_TrainingData/
+BraTS2020_ValidationData/
+dataset_index.csv
+training_data.json
+
+# User Uploads & Logs
+uploads/
+*.log
+server.log
+
+# Virtual Environments
+venv/
+.venv/
+env/
+
+# IDE & OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

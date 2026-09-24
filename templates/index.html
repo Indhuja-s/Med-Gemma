@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedGemma AI | Enterprise Interactive Radiology Workstation</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Single-accordion interactive enterprise radiology application for brain MRI tumor detection, 3D volumetric segmentation, and automated WHO grading powered by Google MedGemma and 3D U-Net.">
+    <meta name="keywords" content="MedGemma, Brain MRI, Segmentation, Neuroradiology, U-Net, DICOM Viewer, Tumor Detection, Glioblastoma">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 Pro Icons & Lucide Support -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Application Stylesheet -->
+    <link rel="stylesheet" href="/static/style.css?v=2.4.2">
+</head>
+
+<body>
+    <!-- Mobile Backdrop Overlay -->
+    <div class="mobile-backdrop" id="mobileBackdrop"></div>
+
+    <!-- App Container -->
+    <div class="app-layout" id="appLayout">
+        
+        <!-- ==========================================================================
+             SINGLE-ACCORDION DYNAMIC WORKSPACE SIDEBAR NAVIGATION
+             ========================================================================== -->
+        <aside class="sidebar" id="sidebar" aria-label="Workspace Navigation">
+            
+            <!-- STICKY TOP HEADER WITH BRAND LOGO & TOGGLE BUTTON -->
+            <div class="sidebar-top">
+                <div class="brand-logo-wrapper">
+                    <div class="brand-icon">
+                        <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <div class="brand-text">
+                        <h2>MedGemma <span>AI</span></h2>
+                        <span class="brand-badge">ENTERPRISE v2.4.1</span>
+                    </div>
+                </div>
+
+                <button class="collapse-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle Navigation Sidebar (Ctrl+B)">
+                    <i class="fa-solid fa-chevron-left" id="toggleIcon"></i>
+                </button>
+            </div>
+
+            <!-- INTERNALLY SCROLLABLE NAVIGATION CONTENT -->
+            <div class="sidebar-scroll-content">
+                
+                <!-- DYNAMIC WORKSPACE HEADER (BELOW LOGO) -->
+                <div class="active-workspace-header" id="workspaceHeader">
+                    <span class="ws-label">CURRENT WORKSPACE</span>
+                    <strong class="ws-name" id="wsCurrentName">Dashboard Overview</strong>
+                    <div class="ws-meta-row">
+                        <span class="ws-meta" id="wsCurrentScan">Current Scan: BraTS20_Training_001</span>
+                        <span class="ws-meta" id="wsCurrentPatient">Patient: Emily Jackson</span>
+                        <span class="ws-meta text-green" id="wsCurrentStatus">Status: Ready for Analysis</span>
+                    </div>
+                </div>
+
+                <!-- FLOATING QUICK SEARCH INPUT WITH INSTANT HIGHLIGHTING -->
+                <div class="sidebar-search-box" id="sidebarSearchWrapper">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="sidebarSearchInput" placeholder="Search Workspaces & Tools...">
+                    <kbd>Ctrl/⌘K</kbd>
+                </div>
+
+                <!-- SINGLE-ACCORDION DYNAMIC NAVIGATION TREE -->
+                <nav class="sidebar-menu" id="sidebarMenu">
+                    
+                    <!-- 1. DASHBOARD ACCORDION MODULE -->
+                    <div class="nav-accordion-item active" data-page="dashboard">
+                        <button class="nav-item-header" data-page-trigger="dashboard">
+                            <i class="fa-solid fa-house nav-icon"></i>
+                            <span class="nav-label">Dashboard</span>
+                            <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                        </button>
+                        <div class="submenu-container">
+                            <button class="sub-item active" data-page="dashboard" data-sub="overview"><i class="fa-solid fa-chart-pie"></i> Overview</button>
+                            <button class="sub-item" data-page="dashboard" data-sub="today-cases"><i class="fa-solid fa-hospital-user"></i> Today's Cases</button>
+                            <button class="sub-item" data-page="dashboard" data-sub="quick-actions"><i class="fa-solid fa-bolt"></i> Quick Actions</button>
+                            <button class="sub-item" data-page="dashboard" data-sub="recent-activity"><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity</button>
+                            <button class="sub-item" data-page="dashboard" data-sub="statistics"><i class="fa-solid fa-chart-line"></i> Statistics</button>
+                        </div>
+                    </div>
+
+                    <!-- 2. MRI WORKSPACE ACCORDION MODULE -->
+                    <div class="nav-accordion-item" data-page="workstation">
+                        <button class="nav-item-header" data-page-trigger="workstation">
+                            <i class="fa-solid fa-brain nav-icon"></i>
+                            <span class="nav-label">MRI Workspace</span>
+                            <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                        </button>
+                        <div class="submenu-container">
+                            <button class="sub-item" data-page="workstation" data-sub="open-scan"><i class="fa-solid fa-folder-open"></i> Open Scan</button>
+                            <button class="sub-item" data-page="workstation" data-sub="dicom-viewer"><i class="fa-solid fa-display"></i> DICOM Viewer</button>
+                            <button class="sub-item" data-page="workstation" data-sub="3d-reconstruction"><i class="fa-solid fa-cube"></i> 3D Reconstruction</button>
+                            <button class="sub-item" data-page="workstation" data-sub="measurements"><i class="fa-solid fa-ruler"></i> Measurements</button>
+                            <button class="sub-item" data-page="workstation" data-sub="annotation-tools"><i class="fa-solid fa-highlighter"></i> Annotation Tools</button>
+                            <button class="sub-item" data-page="workstation" data-sub="scan-comparison"><i class="fa-solid fa-sliders"></i> Scan Comparison</button>
+                            <button class="sub-item" data-page="workstation" data-sub="export-scan"><i class="fa-solid fa-download"></i> Export Scan</button>
+                        </div>
+                    </div>
+
+                    <!-- 3. PATIENTS ACCORDION MODULE -->
+                    <div class="nav-accordion-item" data-page="patients">
+                        <button class="nav-item-header" data-page-trigger="patients">
+                            <i class="fa-solid fa-users nav-icon"></i>
+                            <span class="nav-label">Patients</span>
+                            <span class="nav-badge-pill">2</span>
+                            <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                        </button>
+                        <div class="submenu-container">
+                            <button class="sub-item" data-page="patients" data-sub="patient-list"><i class="fa-solid fa-list-check"></i> Patient List</button>
+                            <button class="sub-item" data-page="patients" data-sub="add-patient"><i class="fa-solid fa-user-plus"></i> Add Patient</button>
+                            <button class="sub-item" data-page="patients" data-sub="medical-history"><i class="fa-solid fa-notes-medical"></i> Medical History</button>
+                            <button class="sub-item" data-page="patients" data-sub="previous-scans"><i class="fa-solid fa-x-ray"></i> Previous Scans</button>
+                            <button class="sub-item" data-page="patients" data-sub="appointments"><i class="fa-solid fa-calendar-check"></i> Appointments</button>
+                            <button class="sub-item" data-page="patients" data-sub="assigned-doctors"><i class="fa-solid fa-user-doctor"></i> Assigned Doctors</button>
+                        </div>
+                    </div>
+
+                    <!-- 4. UPLOAD MRI ACCORDION MODULE -->
+                    <div class="nav-accordion-item" data-page="upload">
+                        <button class="nav-item-header" data-page-trigger="upload">
+                            <i class="fa-solid fa-cloud-arrow-up nav-icon"></i>
+                            <span class="nav-label">Upload MRI</span>
+                            <span class="nav-tag">DICOM</span>
+                            <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                        </button>
+                        <div class="submenu-container">
+                            <button class="sub-item" data-page="upload" data-sub="upload-dicom"><i class="fa-solid fa-file-medical"></i> Upload DICOM</button>
+                            <button class="sub-item" data-page="upload" data-sub="upload-nifti"><i class="fa-solid fa-cubes"></i> Upload NIfTI</button>
+                            <button class="sub-item" data-page="upload" data-sub="batch-upload"><i class="fa-solid fa-layer-group"></i> Batch Upload</button>
+                            <button class="sub-item" data-page="upload" data-sub="upload-history"><i class="fa-solid fa-clock"></i> Upload History</button>
+                            <button class="sub-item" data-page="upload" data-sub="processing-queue"><i class="fa-solid fa-spinner"></i> Processing Queue</button>
+                            <button class="sub-item" data-page="upload" data-sub="import-settings"><i class="fa-solid fa-sliders"></i> Import Settings</button>
+                        </div>
+                    </div>
+
+                    <!-- 5. AI ANALYSIS ACCORDION MODULE -->
+                    <div class="nav-accordion-item" data-page="analysis">
+                        <button class="nav-item-header" data-page-trigger="analysis">
+                            <i class="fa-solid fa-robot nav-icon"></i>
+                            <span class="nav-label">AI Analysis</span>
+                            <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                        </button>
+                        <div class="submenu-container">
+                            <button class="sub-item" data-page="analysis" data-sub="tumor-detection"><i class="fa-solid fa-crosshairs text-red"></i> Tumor Detection</button>
+                            <button class="sub-item" data-page="analysis" data-sub="tumor-classification"><i class="fa-solid fa-tags"></i> Tumor Classification</button>
+                            <button class="sub-item" data-page="analysis" data-sub="confidence-score"><i class="fa-solid fa-gauge"></i> Confidence Score</button>
+                            <button class="sub-item" data-page="analysis" data-sub="risk-assessment"><i class="fa-solid fa-shield-halved text-amber"></i> Risk Assessment</button>
+                            <button class="sub-item" data-page="analysis" data-sub="clinical-summary"><i class="fa-solid fa-file-lines"></i> Clinical Summary</button>
+                            <button class="sub-item" data-page="analysis" data-sub="treatment-suggestions"><i class="fa-solid fa-user-doctor"></i> Treatment Suggestions</button>
+                            <button class="sub-item" data-page="analysis" data-sub="explain-ai"><i class="fa-solid fa-wand-magic-sparkles"></i> Explain AI</button>
+                            <button class="sub-item" data-page="analysis" data-sub="model-performance"><i class="fa-solid fa-microchip"></i> Model Performance</button>
+                        </div>
+                    </div>
+
+                    <!-- 6. SEGMENTATION ACCORDION MODULE -->
+                    <div class="nav-accordion-item" data-page="segmentation">
+                        <button class="nav-item-header" data-page-trigger="segmentation">
+                            <i class="fa-solid fa-bullseye nav-icon"></i>
+                            <span class="nav-label">Segmentation</span>
+                            <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                        </button>
+                        <div class="submenu-container">
+                            <button class="sub-item" data-page="segmentation" data-sub="tumor-core"><i class="fa-solid fa-circle-dot text-red"></i> Tumor Core</button>
+                            <button class="sub-item" data-page="segmentation" data-sub="edema"><i class="fa-solid fa-circle-dot text-green"></i> Edema</button>
+                            <button class="sub-item" data-page="segmentation" data-sub="enhancing-tumor"><i class="fa-solid fa-circle-dot text-amber"></i> Enhancing Tumor</button>
+                            <button class="sub-item" data-page="segmentation" data-sub="overlay-controls"><i class="fa-solid fa-layer-group"></i> Overlay Controls</button>
+                            <button class="sub-item" data-page="segmentation" data-sub="volume-analysis"><i class="fa-solid fa-cube"></i> Volume Analysis</button>
+                            <button class="sub-item" data-page="segmentation" data-sub="segmentation-metrics"><i class="fa-solid fa-chart-pie"></i> Segmentation Metrics</button>
+                            <button class="sub-item" data-page="segmentation" data-sub="export-mask"><i class="fa-solid fa-download"></i> Export Mask</button>
+                        </div>
+                    </div>
+
+                    <!-- 7. REPORTS ACCORDION MODULE -->
+                    <div class="nav-accordion-item" data-page="reports">
+                        <button class="nav-item-header" data-page-trigger="reports">
+                            <i class="fa-solid fa-chart-column nav-icon"></i>
+                            <span class="nav-label">Reports</span>
+                            <span class="nav-badge-pill purple-badge">4</span>
+                            <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                        </button>
+                        <div class="submenu-container">
+                            <button class="sub-item" data-page="reports" data-sub="generate-report"><i class="fa-solid fa-plus"></i> Generate Report</button>
+                            <button class="sub-item" data-page="reports" data-sub="draft-reports"><i class="fa-solid fa-pen"></i> Draft Reports</button>
+                            <button class="sub-item" data-page="reports" data-sub="completed-reports"><i class="fa-solid fa-circle-check"></i> Completed Reports</button>
+                            <button class="sub-item" data-page="reports" data-sub="report-templates"><i class="fa-solid fa-copy"></i> Report Templates</button>
+                            <button class="sub-item" data-page="reports" data-sub="export-pdf"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+                            <button class="sub-item" data-page="reports" data-sub="share-report"><i class="fa-solid fa-share-nodes"></i> Share Report</button>
+                        </div>
+                    </div>
+
+                    <!-- 8. HISTORY ACCORDION MODULE -->
+                    <div class="nav-accordion-item" data-page="history">
+                        <button class="nav-item-header" data-page-trigger="history">
+                            <i class="fa-solid fa-clock-rotate-left nav-icon"></i>
+                            <span class="nav-label">History</span>
+                            <span class="nav-badge-pill">15</span>
+                            <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                        </button>
+                        <div class="submenu-container">
+                            <button class="sub-item" data-page="history" data-sub="scan-history"><i class="fa-solid fa-x-ray"></i> Scan History</button>
+                            <button class="sub-item" data-page="history" data-sub="ai-analysis-history"><i class="fa-solid fa-brain"></i> AI Analysis History</button>
+                            <button class="sub-item" data-page="history" data-sub="report-history"><i class="fa-solid fa-file-invoice"></i> Report History</button>
+                            <button class="sub-item" data-page="history" data-sub="downloads"><i class="fa-solid fa-download"></i> Downloads</button>
+                            <button class="sub-item" data-page="history" data-sub="activity-logs"><i class="fa-solid fa-list text-cyan"></i> Activity Logs</button>
+                            <button class="sub-item" data-page="history" data-sub="audit-trail"><i class="fa-solid fa-shield-halved"></i> Audit Trail</button>
+                        </div>
+                    </div>
+
+                    <!-- 9. SETTINGS ACCORDION MODULE -->
+                    <div class="nav-accordion-item" data-page="settings">
+                        <button class="nav-item-header" data-page-trigger="settings">
+                            <i class="fa-solid fa-gear nav-icon"></i>
+                            <span class="nav-label">Settings</span>
+                            <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                        </button>
+                        <div class="submenu-container">
+                            <button class="sub-item" data-page="settings" data-sub="general"><i class="fa-solid fa-sliders"></i> General</button>
+                            <button class="sub-item" data-page="settings" data-sub="appearance"><i class="fa-solid fa-palette"></i> Appearance</button>
+                            <button class="sub-item" data-page="settings" data-sub="notifications"><i class="fa-solid fa-bell"></i> Notifications</button>
+                            <button class="sub-item" data-page="settings" data-sub="security"><i class="fa-solid fa-lock"></i> Security</button>
+                            <button class="sub-item" data-page="settings" data-sub="ai-models"><i class="fa-solid fa-microchip"></i> AI Models</button>
+                            <button class="sub-item" data-page="settings" data-sub="hospital-config"><i class="fa-solid fa-hospital"></i> Hospital Configuration</button>
+                            <button class="sub-item" data-page="settings" data-sub="keyboard-shortcuts"><i class="fa-solid fa-keyboard"></i> Keyboard Shortcuts</button>
+                            <button class="sub-item" data-page="settings" data-sub="about"><i class="fa-solid fa-circle-info"></i> About</button>
+                        </div>
+                    </div>
+
+                </nav>
+            </div>
+
+            <!-- STICKY BOTTOM SECTION -->
+            <div class="sidebar-bottom">
+                
+                <!-- DYNAMIC BOTTOM INFORMATION PANEL CARD -->
+                <div class="contextual-mini-card" id="contextualCard">
+                    <div class="card-header-mini">
+                        <i class="fa-solid fa-chart-simple text-cyan" id="contextIcon"></i>
+                        <span id="contextTitle">DASHBOARD SUMMARY</span>
+                    </div>
+                    <div class="card-body-mini" id="contextBody">
+                        <div class="mini-stat"><span>Today's Cases</span><strong class="text-cyan">12</strong></div>
+                        <div class="mini-stat"><span>Pending Reviews</span><strong class="text-amber">4</strong></div>
+                        <div class="mini-stat"><span>Critical Alerts</span><strong class="text-red">2</strong></div>
+                    </div>
+                </div>
+
+                <!-- RICH DOCTOR PROFILE CARD -->
+                <div class="sidebar-profile-card" id="profileCard" tabindex="0" aria-haspopup="true" aria-expanded="false" data-tooltip="Dr. Eleanor Vance">
+                    <div class="profile-avatar-wrap">
+                        <img src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=100&auto=format&fit=crop&q=80" alt="Dr. Eleanor Vance" class="profile-avatar">
+                        <span class="online-indicator"></span>
+                    </div>
+                    <div class="profile-meta">
+                        <span class="p-name">Dr. Eleanor Vance</span>
+                        <span class="p-status">● Online • Johns Hopkins</span>
+                        <span class="p-cases">12 Active Cases Today</span>
+                    </div>
+                    <i class="fa-solid fa-ellipsis-vertical profile-more-icon"></i>
+
+                    <!-- RICH PROFILE POPOVER MENU -->
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <div class="profile-popover-header">
+                            <strong>Dr. Eleanor Vance, MD</strong>
+                            <p>Johns Hopkins Neuroradiology</p>
+                            <span class="popover-email">e.vance@jhmi.edu</span>
+                        </div>
+                        <div class="popover-stats-row">
+                            <div class="p-stat"><span>Today's Triage:</span><strong>12 Scans (1 Critical)</strong></div>
+                        </div>
+                        <hr class="dropdown-divider">
+                        <button class="dropdown-item"><i class="fa-solid fa-user-doctor"></i> My Profile</button>
+                        <button class="dropdown-item"><i class="fa-solid fa-sliders"></i> Preferences</button>
+                        <button class="dropdown-item" id="themeToggleDropdownBtn"><i class="fa-solid fa-moon"></i> Theme Toggle</button>
+                        <button class="dropdown-item"><i class="fa-solid fa-bell"></i> Notifications</button>
+                        <hr class="dropdown-divider">
+                        <button class="dropdown-item danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+                    </div>
+                </div>
+
+                <!-- SIDEBAR FOOTER -->
+                <div class="sidebar-footer">
+                    <span>MedGemma AI Enterprise v2.4.1</span>
+                    <span class="footer-copy">© 2026 Google MedGemma Project</span>
+                </div>
+
+            </div>
+        </aside>
+
+        <!-- ==========================================================================
+             MAIN CONTENT AREA
+             ========================================================================== -->
+        <main class="main-wrapper">
+            
+            <!-- TOP NAVBAR -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="icon-btn mobile-hamburger" id="mobileHamburgerBtn" aria-label="Open Mobile Menu">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="searchInput" placeholder="Search Patient ID, Name, or DICOM tag... (Ctrl+K)">
+                        <kbd>Ctrl K</kbd>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <button class="icon-btn" id="notifBellBtn" title="Notifications">
+                        <i class="fa-solid fa-bell"></i>
+                        <span class="notif-badge">3</span>
+                    </button>
+
+                    <div class="v-divider"></div>
+
+                    <div class="hospital-brand">
+                        <i class="fa-solid fa-hospital"></i>
+                        <div class="hospital-meta">
+                            <span class="h-name">Johns Hopkins Hospital</span>
+                            <span class="h-dept">Dept. of Neuroradiology</span>
+                        </div>
+                    </div>
+
+                    <div class="v-divider"></div>
+
+                    <div class="utc-clock" id="utcClock">
+                        <i class="fa-regular fa-clock"></i>
+                        <span id="clockText">14:57:33 UTC</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- INTELLIGENT DEEP BREADCRUMB NAVIGATION BAR -->
+            <div class="breadcrumb-bar">
+                <i class="fa-solid fa-house text-cyan"></i>
+                <span class="bc-item">Home</span>
+                <span class="bc-sep">></span>
+                <span class="bc-item" id="bcCategory">Dashboard</span>
+                <span class="bc-sep">></span>
+                <strong id="bcDetail">Emily Jackson (BraTS20_Training_001)</strong>
+            </div>
+
+            <!-- DYNAMIC MODULAR PAGE CONTAINER -->
+            <div class="page-container" id="pageContainer">
+                
+                <!-- PAGE 1: DASHBOARD -->
+                <div class="page-view active" id="page-dashboard">
+                    <div class="page-subnav-bar glass-card">
+                        <button class="page-subnav-btn active" data-page="dashboard" data-sub="overview"><i class="fa-solid fa-chart-pie"></i> Overview</button>
+                        <button class="page-subnav-btn" data-page="dashboard" data-sub="today-cases"><i class="fa-solid fa-hospital-user"></i> Today's Cases</button>
+                        <button class="page-subnav-btn" data-page="dashboard" data-sub="quick-actions"><i class="fa-solid fa-bolt"></i> Quick Actions</button>
+                        <button class="page-subnav-btn" data-page="dashboard" data-sub="recent-activity"><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity</button>
+                        <button class="page-subnav-btn" data-page="dashboard" data-sub="statistics"><i class="fa-solid fa-chart-line"></i> Statistics</button>
+                    </div>
+
+                    <!-- SUB-PANEL 1: OVERVIEW -->
+                    <div class="sub-content-panel active" data-sub-panel="overview">
+                        <div class="welcome-card glass-card">
+                            <div class="welcome-text">
+                                <h2>Welcome back, Dr. Eleanor Vance 👋</h2>
+                                <p>You have <strong>12 patient cases</strong> assigned for neuroradiology triage today. <strong>1 scan</strong> flagged as critical mass effect requiring urgent review.</p>
+                            </div>
+                            <div class="welcome-actions">
+                                <button class="primary-btn glow-btn" data-nav="workstation"><i class="fa-solid fa-microscope"></i> Launch Workspace</button>
+                                <button class="secondary-btn" data-nav="upload"><i class="fa-solid fa-cloud-arrow-up"></i> Upload MRI</button>
+                            </div>
+                        </div>
+
+                        <div class="kpi-row">
+                            <div class="kpi-card glass-card">
+                                <div class="kpi-header"><span class="kpi-title">TOTAL PATIENTS</span><div class="kpi-icon cyan"><i class="fa-solid fa-users"></i></div></div>
+                                <div class="kpi-body"><span class="kpi-num">1,428</span><span class="kpi-pct text-green"><i class="fa-solid fa-arrow-trend-up"></i> +12.4%</span></div>
+                                <canvas class="sparkline" id="sparkPatients" height="24"></canvas>
+                            </div>
+                            <div class="kpi-card glass-card">
+                                <div class="kpi-header"><span class="kpi-title">MRI SCANS</span><div class="kpi-icon purple"><i class="fa-solid fa-folder-open"></i></div></div>
+                                <div class="kpi-body"><span class="kpi-num">3,892</span><span class="kpi-pct text-green"><i class="fa-solid fa-arrow-trend-up"></i> +8.2%</span></div>
+                                <canvas class="sparkline" id="sparkScans" height="24"></canvas>
+                            </div>
+                            <div class="kpi-card glass-card">
+                                <div class="kpi-header"><span class="kpi-title">TUMORS DETECTED</span><div class="kpi-icon red"><i class="fa-solid fa-crosshairs"></i></div></div>
+                                <div class="kpi-body"><span class="kpi-num">412</span><span class="kpi-pct text-amber"><i class="fa-solid fa-triangle-exclamation"></i> 28.8%</span></div>
+                                <canvas class="sparkline" id="sparkTumors" height="24"></canvas>
+                            </div>
+                            <div class="kpi-card glass-card">
+                                <div class="kpi-header"><span class="kpi-title">AI ACCURACY</span><div class="kpi-icon green"><i class="fa-solid fa-bolt-lightning"></i></div></div>
+                                <div class="kpi-body"><span class="kpi-num">98.7%</span><span class="kpi-pct text-green"><i class="fa-solid fa-shield-check"></i> +0.4%</span></div>
+                                <canvas class="sparkline" id="sparkAccuracy" height="24"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-grid-row">
+                            <div class="dash-card glass-card">
+                                <div class="dash-card-head">
+                                    <h3><i class="fa-solid fa-hospital-user text-cyan"></i> Recent Patient Triage</h3>
+                                    <button class="link-btn" data-nav="patients">View All Patients <i class="fa-solid fa-arrow-right"></i></button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="dash-table">
+                                        <thead><tr><th>Patient ID</th><th>Name</th><th>Age/Sex</th><th>Modality</th><th>Status</th><th>Action</th></tr></thead>
+                                        <tbody>
+                                            <tr><td class="mono">P-8942</td><td><strong>Emily Jackson</strong></td><td>54 M</td><td>3T FLAIR T2</td><td><span class="badge red-badge">CRITICAL</span></td><td><button class="primary-btn xs-btn" data-patient-id="BraTS20_Training_001" data-nav="workstation">Open MRI</button></td></tr>
+                                            <tr><td class="mono">P-8943</td><td><strong>Sarah Jenkins</strong></td><td>42 F</td><td>3T FLAIR T2</td><td><span class="badge yellow-badge">HIGH RISK</span></td><td><button class="secondary-btn xs-btn" data-patient-id="BraTS20_Training_002" data-nav="workstation">Open MRI</button></td></tr>
+                                            <tr><td class="mono">P-8944</td><td><strong>David Miller</strong></td><td>61 M</td><td>3T FLAIR T2</td><td><span class="badge green-badge">NORMAL</span></td><td><button class="secondary-btn xs-btn" data-patient-id="BraTS20_Training_003" data-nav="workstation">Open MRI</button></td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="dash-card glass-card">
+                                <div class="dash-card-head"><h3><i class="fa-solid fa-clock-rotate-left text-purple"></i> Activity Feed & Quick Actions</h3></div>
+                                <div class="quick-actions-row">
+                                    <button class="action-btn" data-nav="upload"><i class="fa-solid fa-cloud-arrow-up"></i> Upload MRI</button>
+                                    <button class="action-btn" data-nav="patients"><i class="fa-solid fa-user-plus"></i> New Patient</button>
+                                    <button class="action-btn" data-nav="analysis"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Analysis</button>
+                                </div>
+                                <div class="activity-timeline-short">
+                                    <div class="act-item"><span class="act-dot red"></span><div><strong>Critical Mass Alert</strong>: Scan P-8942 (34.2 cm³)<span class="act-time">10 mins ago</span></div></div>
+                                    <div class="act-item"><span class="act-dot green"></span><div><strong>U-Net Segmentation Complete</strong> for BraTS20_002<span class="act-time">25 mins ago</span></div></div>
+                                    <div class="act-item"><span class="act-dot cyan"></span><div><strong>Report Exported</strong> by Dr. Vance (PDF)<span class="act-time">1 hr ago</span></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-PANEL 2: TODAY'S CASES -->
+                    <div class="sub-content-panel" data-sub-panel="today-cases" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-hospital-user text-cyan"></i> Today's Assigned Neuroradiology Cases (12 Active)</h3>
+                            <div class="sub-kpi-row my-3">
+                                <div class="sub-kpi"><span>Assigned</span><strong>12</strong></div>
+                                <div class="sub-kpi"><span>Critical</span><strong class="text-red">1</strong></div>
+                                <div class="sub-kpi"><span>High Risk</span><strong class="text-amber">3</strong></div>
+                                <div class="sub-kpi"><span>Completed</span><strong class="text-green">8</strong></div>
+                            </div>
+                            <table class="full-table">
+                                <thead><tr><th>Patient ID</th><th>Name</th><th>Age/Sex</th><th>Hospital</th><th>Modality</th><th>Status</th><th>Actions</th></tr></thead>
+                                <tbody>
+                                    <tr><td class="mono">P-8942</td><td><strong>Emily Jackson</strong></td><td>54 / F</td><td>Johns Hopkins</td><td>3T FLAIR T2</td><td><span class="badge red-badge">CRITICAL</span></td><td><button class="primary-btn xs-btn" data-patient-id="BraTS20_Training_001" data-nav="workstation">Open MRI</button><button class="secondary-btn xs-btn" data-nav="analysis">AI Results</button></td></tr>
+                                    <tr><td class="mono">P-8943</td><td><strong>Sarah Jenkins</strong></td><td>42 / F</td><td>Mayo Clinic</td><td>3T FLAIR T2</td><td><span class="badge yellow-badge">HIGH RISK</span></td><td><button class="secondary-btn xs-btn" data-patient-id="BraTS20_Training_002" data-nav="workstation">Open MRI</button><button class="secondary-btn xs-btn" data-nav="analysis">AI Results</button></td></tr>
+                                    <tr><td class="mono">P-8944</td><td><strong>David Miller</strong></td><td>61 / M</td><td>Mass General</td><td>3T FLAIR T2</td><td><span class="badge green-badge">NORMAL</span></td><td><button class="secondary-btn xs-btn" data-patient-id="BraTS20_Training_003" data-nav="workstation">Open MRI</button><button class="secondary-btn xs-btn" data-nav="reports">View Report</button></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- SUB-PANEL 3: QUICK ACTIONS -->
+                    <div class="sub-content-panel" data-sub-panel="quick-actions" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-bolt text-amber"></i> Quick Actions Center</h3>
+                            <div class="template-grid">
+                                <div class="template-card glass-card">
+                                    <h4><i class="fa-solid fa-cloud-arrow-up text-cyan"></i> Upload MRI Scan</h4>
+                                    <p>Upload new DICOM series or NIfTI (.nii) files for AI analysis.</p>
+                                    <button class="primary-btn sm-btn" data-nav="upload">Launch Upload</button>
+                                </div>
+                                <div class="template-card glass-card">
+                                    <h4><i class="fa-solid fa-user-plus text-green"></i> Register New Patient</h4>
+                                    <p>Add a new patient record to the Johns Hopkins PACS database.</p>
+                                    <button class="primary-btn sm-btn" onclick="activateSubView('patients','add-patient','Add Patient')">New Patient Form</button>
+                                </div>
+                                <div class="template-card glass-card">
+                                    <h4><i class="fa-solid fa-brain text-purple"></i> Run MedGemma AI</h4>
+                                    <p>Execute 3D U-Net volumetric segmentation and neoplasm classification.</p>
+                                    <button class="primary-btn sm-btn" data-nav="analysis">Run AI Model</button>
+                                </div>
+                                <div class="template-card glass-card">
+                                    <h4><i class="fa-solid fa-file-lines text-red"></i> Create Radiology Report</h4>
+                                    <p>Draft and sign official clinical findings document.</p>
+                                    <button class="primary-btn sm-btn" onclick="activateSubView('reports','generate-report','Generate Report')">Create Report</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-PANEL 4: RECENT ACTIVITY -->
+                    <div class="sub-content-panel" data-sub-panel="recent-activity" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-clock-rotate-left text-purple"></i> Detailed Recent Activity Log</h3>
+                            <div class="sub-panel-list">
+                                <div class="sub-list-item"><span class="act-dot red"></span><div><strong>Critical Neoplasm Alert</strong>: Mass effect detected on Scan P-8942 (34.2 cm³)<span class="act-time">10 mins ago</span></div></div>
+                                <div class="sub-list-item"><span class="act-dot green"></span><div><strong>3D U-Net Segmentation</strong> completed for BraTS20_002<span class="act-time">25 mins ago</span></div></div>
+                                <div class="sub-list-item"><span class="act-dot cyan"></span><div><strong>Radiology Report Signed & Exported</strong> by Dr. Eleanor Vance (PDF)<span class="act-time">1 hr ago</span></div></div>
+                                <div class="sub-list-item"><span class="act-dot purple"></span><div><strong>Patient Record Updated</strong>: David Miller (P-8944)<span class="act-time">2 hrs ago</span></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-PANEL 5: STATISTICS -->
+                    <div class="sub-content-panel" data-sub-panel="statistics" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-chart-line text-green"></i> System Performance & Diagnostic Statistics</h3>
+                            <div class="sub-kpi-row my-3">
+                                <div class="sub-kpi"><span>Total Patients</span><strong class="text-cyan">1,428</strong></div>
+                                <div class="sub-kpi"><span>Total Scans</span><strong class="text-purple">3,892</strong></div>
+                                <div class="sub-kpi"><span>Neoplasms Detected</span><strong class="text-red">412 (10.6%)</strong></div>
+                                <div class="sub-kpi"><span>AI Accuracy</span><strong class="text-green">98.7%</strong></div>
+                            </div>
+                            <p style="color:var(--text-muted); font-size:0.85rem;">MedGemma 3D U-Net model trained on BraTS 2020 dataset (155 axial slices per patient). Average GPU inference speed: 240 ms.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 2: MRI WORKSPACE -->
+                <div class="page-view" id="page-workstation">
+                    <div class="patient-summary-row glass-card">
+                        <div class="patient-select-wrapper">
+                            <i class="fa-solid fa-user-gear"></i>
+                            <select id="patientSelect" class="compact-select">
+                                {% for p in patients %}
+                                <option value="{{ p }}">{{ p }} - Brain MRI FLAIR</option>
+                                {% endfor %}
+                            </select>
+                            <button id="loadPatientBtn" class="primary-btn sm-btn"><i class="fa-solid fa-play"></i> Load</button>
+                        </div>
+                        <div class="summary-fields-row">
+                            <div class="s-field"><span class="s-label">Patient Name</span><strong class="s-val" id="metaName">Emily Jackson</strong></div>
+                            <div class="s-field"><span class="s-label">Patient ID</span><strong class="s-val mono" id="metaId">P-8942 / BraTS20_001</strong></div>
+                            <div class="s-field"><span class="s-label">Age / Gender</span><span class="s-val" id="metaAgeGender">54 yrs • Female</span></div>
+                            <div class="s-field"><span class="s-label">MRI Type</span><span class="badge cyan-badge">3T FLAIR T2</span></div>
+                            <div class="s-field"><span class="s-label">Risk Level</span><span class="badge red-badge" id="riskBadge">CRITICAL</span></div>
+                        </div>
+                    </div>
+
+                    <div class="mri-viewer-container glass-card">
+                        <div class="viewer-top-bar">
+                            <div class="v-title"><i class="fa-solid fa-display"></i> Multi-Planar DICOM Radiography Viewer</div>
+                            <div class="v-tools">
+                                <button class="tool-btn active" id="toolPan"><i class="fa-solid fa-hand"></i> Pan</button>
+                                <button class="tool-btn" id="toolCaliper"><i class="fa-solid fa-ruler"></i> Measure</button>
+                                <button class="tool-btn" id="toolPlay"><i class="fa-solid fa-film"></i> Play</button>
+                                <button class="tool-btn" id="toolReset"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+                            </div>
+                        </div>
+
+                        <div class="quad-grid-2x2">
+                            <div class="panel-box">
+                                <div class="panel-tag top"><span>AXIAL VIEW</span><span id="axialTag">Slice 78/155</span></div>
+                                <div class="panel-canvas-wrap"><canvas id="canvasAxial"></canvas></div>
+                                <div class="panel-tag bottom"><span id="axialCoord">X:128 Y:142 | 840 HU</span></div>
+                                <input type="range" class="mini-slider" id="sliderAxial" min="1" max="155" value="78">
+                            </div>
+                            <div class="panel-box">
+                                <div class="panel-tag top"><span>CORONAL VIEW</span><span id="coronalTag">Slice 78/155</span></div>
+                                <div class="panel-canvas-wrap"><canvas id="canvasCoronal"></canvas></div>
+                                <div class="panel-tag bottom"><span id="coronalCoord">X:128 Y:120 | 790 HU</span></div>
+                                <input type="range" class="mini-slider" id="sliderCoronal" min="1" max="155" value="78">
+                            </div>
+                            <div class="panel-box">
+                                <div class="panel-tag top"><span>SAGITTAL VIEW</span><span id="sagittalTag">Slice 78/155</span></div>
+                                <div class="panel-canvas-wrap"><canvas id="canvasSagittal"></canvas></div>
+                                <div class="panel-tag bottom"><span id="sagittalCoord">X:120 Y:142 | 810 HU</span></div>
+                                <input type="range" class="mini-slider" id="sliderSagittal" min="1" max="155" value="78">
+                            </div>
+                            <div class="panel-box highlight">
+                                <div class="panel-tag top"><span class="text-purple">SEGMENTATION OVERLAY</span><span>Alpha: 80%</span></div>
+                                <div class="panel-canvas-wrap"><canvas id="canvasSegmentation"></canvas></div>
+                                <div class="panel-tag bottom"><span id="neoplasmVolumeTag">Neoplasm Core: 34.2 cm³</span></div>
+                                <input type="range" class="mini-slider" id="opacityRange" min="0" max="100" value="80">
+                            </div>
+                        </div>
+
+                        <div class="viewer-bottom-bar">
+                            <div class="v-control"><i class="fa-solid fa-sun"></i> Br: <input type="range" id="brightnessRange" min="50" max="150" value="100"><span id="bVal">100%</span></div>
+                            <div class="v-control"><i class="fa-solid fa-circle-half-stroke"></i> Ct: <input type="range" id="contrastRange" min="50" max="150" value="100"><span id="cVal">100%</span></div>
+                            <div class="v-control"><i class="fa-solid fa-layer-group"></i> <label><input type="checkbox" id="toggleOverlay" checked> Overlay</label></div>
+                            <div class="v-control"><i class="fa-solid fa-border-none"></i> <label><input type="checkbox" id="toggleOutline" checked> Outline</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 3: PATIENTS -->
+                <div class="page-view" id="page-patients">
+                    <div class="page-subnav-bar glass-card mb-3">
+                        <button class="page-subnav-btn active" data-page="patients" data-sub="patient-list"><i class="fa-solid fa-list-check"></i> Patient List</button>
+                        <button class="page-subnav-btn" data-page="patients" data-sub="add-patient"><i class="fa-solid fa-user-plus"></i> Add Patient</button>
+                        <button class="page-subnav-btn" data-page="patients" data-sub="medical-history"><i class="fa-solid fa-notes-medical"></i> Medical History</button>
+                        <button class="page-subnav-btn" data-page="patients" data-sub="previous-scans"><i class="fa-solid fa-x-ray"></i> Previous Scans</button>
+                        <button class="page-subnav-btn" data-page="patients" data-sub="appointments"><i class="fa-solid fa-calendar-check"></i> Appointments</button>
+                        <button class="page-subnav-btn" data-page="patients" data-sub="assigned-doctors"><i class="fa-solid fa-user-doctor"></i> Care Team</button>
+                    </div>
+
+                    <!-- SUB-PANEL 1: PATIENT LIST -->
+                    <div class="sub-content-panel active" data-sub-panel="patient-list">
+                        <div class="page-header-row">
+                            <div class="filter-group">
+                                <input type="text" class="table-search" placeholder="Search patients by name or ID...">
+                                <select class="compact-select">
+                                    <option value="all">All Triage Status</option>
+                                    <option value="critical">Critical Mass</option>
+                                    <option value="high">High Risk</option>
+                                    <option value="normal">Normal</option>
+                                </select>
+                            </div>
+                            <div class="action-group">
+                                <button class="primary-btn sm-btn" onclick="activateSubView('patients','add-patient','Add Patient')"><i class="fa-solid fa-user-plus"></i> Create Patient</button>
+                                <button class="secondary-btn sm-btn" onclick="showToast('Exported patient list to CSV','success')"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+                            </div>
+                        </div>
+
+                        <div class="patients-table-card glass-card">
+                            <table class="full-table">
+                                <thead>
+                                    <tr><th>Patient ID</th><th>Patient Name</th><th>Age / Sex</th><th>MRI Modality</th><th>Hospital</th><th>Doctor</th><th>Status</th><th>Actions</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="mono">P-8942</td><td><strong>Emily Jackson</strong></td><td>54 Y / Female</td><td>3T FLAIR T2</td><td>Johns Hopkins</td><td>Dr. Eleanor Vance</td><td><span class="badge red-badge">CRITICAL</span></td>
+                                        <td><button class="primary-btn xs-btn" data-patient-id="BraTS20_Training_001" data-nav="workstation">Open MRI</button><button class="secondary-btn xs-btn" onclick="activateSubView('patients','medical-history','Medical History')">Details</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="mono">P-8943</td><td><strong>Sarah Jenkins</strong></td><td>42 Y / Female</td><td>3T FLAIR T2</td><td>Mayo Clinic</td><td>Dr. Marcus Thorne</td><td><span class="badge yellow-badge">HIGH RISK</span></td>
+                                        <td><button class="secondary-btn xs-btn" data-patient-id="BraTS20_Training_002" data-nav="workstation">Open MRI</button><button class="secondary-btn xs-btn" onclick="activateSubView('patients','medical-history','Medical History')">Details</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="mono">P-8944</td><td><strong>David Miller</strong></td><td>61 Y / Male</td><td>3T FLAIR T2</td><td>Mass General</td><td>Dr. Sophia Reyes</td><td><span class="badge green-badge">NORMAL</span></td>
+                                        <td><button class="secondary-btn xs-btn" data-patient-id="BraTS20_Training_003" data-nav="workstation">Open MRI</button><button class="secondary-btn xs-btn" onclick="activateSubView('patients','medical-history','Medical History')">Details</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- SUB-PANEL 2: ADD PATIENT -->
+                    <div class="sub-content-panel" data-sub-panel="add-patient" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-user-plus text-green"></i> Add New Patient Record</h3>
+                            <div class="form-grid">
+                                <div class="form-group"><label>Full Name:</label><input type="text" class="compact-input" placeholder="e.g. John Doe"></div>
+                                <div class="form-group"><label>Patient ID:</label><input type="text" class="compact-input" placeholder="e.g. P-8945"></div>
+                                <div class="form-group"><label>Age / Gender:</label><input type="text" class="compact-input" placeholder="e.g. 48 / Male"></div>
+                                <div class="form-group"><label>Attending Physician:</label><select class="compact-select"><option>Dr. Eleanor Vance</option><option>Dr. Marcus Thorne</option><option>Dr. Sophia Reyes</option></select></div>
+                                <button class="primary-btn glow-btn" onclick="showToast('New patient created successfully!','success')"><i class="fa-solid fa-floppy-disk"></i> Register Patient</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-PANEL 3: MEDICAL HISTORY -->
+                    <div class="sub-content-panel" data-sub-panel="medical-history" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-notes-medical text-purple"></i> Patient Medical History — Emily Jackson (P-8942)</h3>
+                            <div class="sub-panel-list">
+                                <div class="sub-list-item"><i class="fa-solid fa-stethoscope text-red"></i> <strong>Nov 2024:</strong> Initial Diagnosis — Grade II Astrocytoma (IDH mutant)</div>
+                                <div class="sub-list-item"><i class="fa-solid fa-pills text-amber"></i> <strong>Jan 2025:</strong> Temozolomide Chemotherapy initiated (Stupp Protocol)</div>
+                                <div class="sub-list-item"><i class="fa-solid fa-radiation text-purple"></i> <strong>Mar 2025:</strong> Radiotherapy completed (60 Gy / 30 fractions)</div>
+                                <div class="sub-list-item"><i class="fa-solid fa-triangle-exclamation text-red"></i> <strong>Aug 2026:</strong> Progression to Grade IV Glioblastoma (34.2 cm³) detected</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-PANEL 4: PREVIOUS SCANS -->
+                    <div class="sub-content-panel" data-sub-panel="previous-scans" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-x-ray text-cyan"></i> Previous MRI Scans Archive — Emily Jackson</h3>
+                            <table class="full-table">
+                                <thead><tr><th>Scan Date</th><th>Modality</th><th>Field Strength</th><th>Tumor Volume</th><th>Comparison</th></tr></thead>
+                                <tbody>
+                                    <tr><td>May 19, 2026</td><td>FLAIR T2</td><td>3.0 Tesla</td><td>31.0 cm³</td><td><button class="secondary-btn xs-btn" data-nav="comparison">Compare</button></td></tr>
+                                    <tr><td>Nov 22, 2025</td><td>FLAIR T2</td><td>3.0 Tesla</td><td>28.5 cm³</td><td><button class="secondary-btn xs-btn" data-nav="comparison">Compare</button></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- SUB-PANEL 5: APPOINTMENTS -->
+                    <div class="sub-content-panel" data-sub-panel="appointments" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-calendar-check text-amber"></i> Scheduled Patient Appointments</h3>
+                            <div class="sub-panel-list">
+                                <div class="sub-list-item"><i class="fa-solid fa-calendar text-cyan"></i> <strong>Aug 07, 2026 (10:00 AM):</strong> Neurosurgical Pre-op Consultation — Dr. Marcus Thorne</div>
+                                <div class="sub-list-item"><i class="fa-solid fa-calendar text-amber"></i> <strong>Aug 12, 2026 (02:30 PM):</strong> Follow-up 3T MRI Scan — Radiology Bay 2</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-PANEL 6: ASSIGNED DOCTORS -->
+                    <div class="sub-content-panel" data-sub-panel="assigned-doctors" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-user-doctor text-cyan"></i> Care Team & Attending Specialists</h3>
+                            <div class="template-grid">
+                                <div class="template-card glass-card">
+                                    <h4>Dr. Eleanor Vance, MD</h4>
+                                    <p>Lead Neuroradiologist • Johns Hopkins Hospital</p>
+                                    <button class="secondary-btn sm-btn" onclick="showToast('Contacting Dr. Vance...','info')">Page Doctor</button>
+                                </div>
+                                <div class="template-card glass-card">
+                                    <h4>Dr. Marcus Thorne, MD</h4>
+                                    <p>Chief of Neurosurgery • Johns Hopkins Hospital</p>
+                                    <button class="secondary-btn sm-btn" onclick="showToast('Contacting Dr. Thorne...','info')">Page Doctor</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 4: UPLOAD MRI -->
+                <div class="page-view" id="page-upload">
+                    <div class="page-subnav-bar glass-card mb-3">
+                        <button class="page-subnav-btn active" data-page="upload" data-sub="upload-dicom"><i class="fa-solid fa-file-medical"></i> Upload DICOM</button>
+                        <button class="page-subnav-btn" data-page="upload" data-sub="upload-nifti"><i class="fa-solid fa-cubes"></i> Upload NIfTI</button>
+                        <button class="page-subnav-btn" data-page="upload" data-sub="batch-upload"><i class="fa-solid fa-layer-group"></i> Batch Upload</button>
+                        <button class="page-subnav-btn" data-page="upload" data-sub="upload-history"><i class="fa-solid fa-clock"></i> Upload History</button>
+                        <button class="page-subnav-btn" data-page="upload" data-sub="processing-queue"><i class="fa-solid fa-spinner"></i> Processing Queue</button>
+                        <button class="page-subnav-btn" data-page="upload" data-sub="import-settings"><i class="fa-solid fa-sliders"></i> Import Settings</button>
+                    </div>
+
+                    <div class="sub-content-panel active" data-sub-panel="upload-dicom">
+                        <div class="upload-page-wrapper glass-card">
+                            <div class="dropzone-large" id="dropzoneLarge">
+                                <i class="fa-solid fa-cloud-arrow-up fa-4x text-cyan"></i>
+                                <h3>Drag & Drop File to Upload</h3>
+                                <p>Supports Medical Scans (.nii, .dcm, .mha, .zip), Images (.png, .jpg, .bmp, .tiff, .webp), Reports & Documents (.pdf, .doc, .docx, .txt)</p>
+                                <button class="primary-btn glow-btn mt-3" id="browseUploadBtn"><i class="fa-solid fa-folder-open"></i> Select Local Files</button>
+                                <input type="file" id="fileInputUpload" hidden accept="*/*">
+                            </div>
+                            <div class="upload-options-grid">
+                                <div class="u-opt">
+                                    <label>Assign Patient:</label>
+                                    <select class="compact-select">
+                                        <option value="P-8942">Emily Jackson (P-8942)</option>
+                                        <option value="P-8943">Sarah Jenkins (P-8943)</option>
+                                        <option value="new">+ Create New Patient Record</option>
+                                    </select>
+                                </div>
+                                <div class="u-opt">
+                                    <label>MRI Sequence:</label>
+                                    <select class="compact-select">
+                                        <option value="flair">3T FLAIR T2-Weighted</option>
+                                        <option value="t1gd">T1-Contrast (T1Gd)</option>
+                                        <option value="t2">T2-Weighted</option>
+                                    </select>
+                                </div>
+                                <button class="primary-btn glow-btn full-width-btn" data-nav="workstation"><i class="fa-solid fa-wand-magic-sparkles"></i> Analyze Scan with MedGemma AI</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="upload-nifti" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-cubes text-purple"></i> Upload NIfTI Neuroimaging Volume (.nii / .nii.gz)</h3>
+                            <div class="dropzone-large">
+                                <i class="fa-solid fa-box-open fa-3x text-purple"></i>
+                                <p class="mt-2">Drag NIfTI (.nii) compressed volume file here</p>
+                                <button class="primary-btn sm-btn mt-2" onclick="showToast('NIfTI file selected!','info')">Select .nii File</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="batch-upload" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-layer-group text-amber"></i> Multi-Scan Batch Upload Queue</h3>
+                            <div class="sub-panel-list">
+                                <div class="sub-list-item"><i class="fa-solid fa-spinner fa-spin text-amber"></i> <strong>BraTS20_Training_002.nii.gz</strong> — Uploading (65%)</div>
+                                <div class="sub-list-item"><i class="fa-solid fa-circle-check text-green"></i> <strong>BraTS20_Training_001.nii.gz</strong> — Completed</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="upload-history" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-clock text-green"></i> Upload History Log</h3>
+                            <table class="full-table">
+                                <thead><tr><th>Filename</th><th>Size</th><th>Uploaded Date</th><th>Status</th></tr></thead>
+                                <tbody>
+                                    <tr><td>BraTS20_Training_001.nii.gz</td><td>14.2 MB</td><td>Today, 12:15</td><td><span class="badge green-badge">PROCESSED</span></td></tr>
+                                    <tr><td>BraTS20_Training_002.nii.gz</td><td>13.8 MB</td><td>Today, 14:02</td><td><span class="badge yellow-badge">QUEUED</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="processing-queue" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-spinner text-amber"></i> AI Segmentation Processing Queue</h3>
+                            <div class="sub-kpi-row my-3">
+                                <div class="sub-kpi"><span>Active Task</span><strong class="text-purple">U-Net 3D</strong></div>
+                                <div class="sub-kpi"><span>Queue Length</span><strong class="text-cyan">1 Job</strong></div>
+                                <div class="sub-kpi"><span>GPU Utilization</span><strong class="text-green">64%</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="import-settings" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-sliders text-cyan"></i> Import & PACS Connection Settings</h3>
+                            <div class="form-grid">
+                                <div class="form-group"><label>Auto-Anonymize DICOM Headers:</label><input type="checkbox" checked> <span>Strip Patient PII</span></div>
+                                <div class="form-group"><label>Default Target Resolution:</label><select class="compact-select"><option>128x128 Slices</option><option>256x256 Slices</option></select></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 5: AI ANALYSIS -->
+                <div class="page-view" id="page-analysis">
+                    <div class="page-subnav-bar glass-card mb-3">
+                        <button class="page-subnav-btn active" data-page="analysis" data-sub="tumor-detection"><i class="fa-solid fa-crosshairs text-red"></i> Tumor Detection</button>
+                        <button class="page-subnav-btn" data-page="analysis" data-sub="tumor-classification"><i class="fa-solid fa-tags"></i> Classification</button>
+                        <button class="page-subnav-btn" data-page="analysis" data-sub="confidence-score"><i class="fa-solid fa-gauge"></i> Confidence</button>
+                        <button class="page-subnav-btn" data-page="analysis" data-sub="risk-assessment"><i class="fa-solid fa-shield-halved text-amber"></i> Risk Assessment</button>
+                        <button class="page-subnav-btn" data-page="analysis" data-sub="clinical-summary"><i class="fa-solid fa-file-lines"></i> Summary</button>
+                        <button class="page-subnav-btn" data-page="analysis" data-sub="treatment-suggestions"><i class="fa-solid fa-user-doctor"></i> Treatment</button>
+                        <button class="page-subnav-btn" data-page="analysis" data-sub="explain-ai"><i class="fa-solid fa-wand-magic-sparkles"></i> Explain AI</button>
+                        <button class="page-subnav-btn" data-page="analysis" data-sub="model-performance"><i class="fa-solid fa-microchip"></i> Model Performance</button>
+                    </div>
+
+                    <div class="sub-content-panel active" data-sub-panel="tumor-detection">
+                        <div class="analysis-page-grid">
+                            <div class="ai-hero-card glass-card">
+                                <div class="ai-hero-top">
+                                    <div class="ring-wrapper">
+                                        <svg viewBox="0 0 80 80">
+                                            <circle class="ring-bg" cx="40" cy="40" r="34"></circle>
+                                            <circle class="ring-fg" id="ringFg" cx="40" cy="40" r="34" stroke-dasharray="213.6" stroke-dashoffset="2.8"></circle>
+                                        </svg>
+                                        <div class="ring-text"><span class="r-num">98.7%</span><span class="r-lbl">CONFIDENCE</span></div>
+                                    </div>
+                                    <div class="ai-verdict-large">
+                                        <span class="v-status text-red">CRITICAL NEOPLASM DETECTED</span>
+                                        <h2>High-Grade Glioblastoma Multiforme (GBM)</h2>
+                                        <span class="badge who-badge">WHO GRADE IV • HIGH SEVERITY</span>
+                                    </div>
+                                </div>
+                                <div class="ai-metrics-row">
+                                    <div class="m-box"><span>Tumor Location</span><strong>Left Temporal-Parietal Lobe</strong></div>
+                                    <div class="m-box"><span>Estimated Volume</span><strong class="text-purple">34.2 cm³</strong></div>
+                                    <div class="m-box"><span>Risk Score</span><strong class="text-red">88 / 100 (HIGH)</strong></div>
+                                    <div class="m-box"><span>Inference Time</span><strong class="text-green">240 ms (GPU)</strong></div>
+                                </div>
+                            </div>
+                            <div class="ai-chat-card glass-card">
+                                <div class="card-head"><i class="fa-solid fa-brain text-cyan"></i> MedGemma AI Co-Pilot Assistant</div>
+                                <div class="chat-history-compact" id="chatHistoryPage">
+                                    <div class="c-msg bot"><p>Hello Dr. Vance. I am MedGemma AI. Measured neoplasm volume for <strong>P-8942</strong> is <strong>34.2 cm³</strong>. How can I assist your diagnostic plan?</p></div>
+                                </div>
+                                <div class="chat-quick-chips">
+                                    <button class="chip-btn" data-query="Explain Tumor">Explain Tumor</button>
+                                    <button class="chip-btn" data-query="Generate Report">Report</button>
+                                    <button class="chip-btn" data-query="Treatment Plan">Plan</button>
+                                    <button class="chip-btn" data-query="Clinical Summary">Summary</button>
+                                </div>
+                                <div class="chat-input-row">
+                                    <input type="text" id="chatInputPage" placeholder="Ask MedGemma about this MRI...">
+                                    <button id="sendBtnPage" class="icon-send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="tumor-classification" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-tags text-purple"></i> Neoplasm Classification Breakdown</h3>
+                            <div class="sub-panel-list">
+                                <div class="sub-list-item"><i class="fa-solid fa-tag text-red"></i> <strong>Histological Diagnosis:</strong> Glioblastoma Multiforme (GBM)</div>
+                                <div class="sub-list-item"><i class="fa-solid fa-dna text-purple"></i> <strong>Molecular Subtype:</strong> IDH-Wildtype (EGFR amplified)</div>
+                                <div class="sub-list-item"><i class="fa-solid fa-flask text-amber"></i> <strong>MGMT Status:</strong> Unmethylated</div>
+                                <div class="sub-list-item"><i class="fa-solid fa-shield-cat text-red"></i> <strong>WHO Grade:</strong> Grade IV (Highest Severity)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="confidence-score" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-gauge text-green"></i> Model Confidence & Segmentation Validation</h3>
+                            <div class="sub-kpi-row my-3">
+                                <div class="sub-kpi"><span>Overall Confidence</span><strong class="text-green">98.7%</strong></div>
+                                <div class="sub-kpi"><span>Dice Score</span><strong class="text-cyan">0.932</strong></div>
+                                <div class="sub-kpi"><span>IoU Score</span><strong class="text-purple">0.874</strong></div>
+                                <div class="sub-kpi"><span>Precision</span><strong class="text-green">0.948</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="risk-assessment" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-shield-halved text-amber"></i> Comprehensive Risk Assessment</h3>
+                            <div class="sub-kpi-row my-3">
+                                <div class="sub-kpi"><span>Risk Score</span><strong class="text-red">88 / 100</strong></div>
+                                <div class="sub-kpi"><span>Growth Rate</span><strong class="text-amber">+10.3% / 75d</strong></div>
+                                <div class="sub-kpi"><span>Mass Effect</span><strong class="text-red">Midline Shift (4mm)</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="clinical-summary" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-file-lines text-cyan"></i> MedGemma AI Diagnostic Summary</h3>
+                            <p style="line-height:1.6;">3T Multi-Parametric MRI demonstrates a hyperintense space-occupying intra-axial mass located in Left Temporal-Parietal Lobe measuring 34.2 cm³ with associated peritumoral edema (+12.1 cm³). Urgent neurosurgical evaluation advised.</p>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="treatment-suggestions" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-user-doctor text-green"></i> Recommended Clinical Management</h3>
+                            <div class="sub-panel-list">
+                                <div class="sub-list-item"><i class="fa-solid fa-scalpel text-red"></i> <strong>Surgical Resection:</strong> Maximal safe resection (>90% EOR target)</div>
+                                <div class="sub-list-item"><i class="fa-solid fa-pills text-amber"></i> <strong>Edema Control:</strong> Dexamethasone 8mg PO TID</div>
+                                <div class="sub-list-item"><i class="fa-solid fa-radiation text-purple"></i> <strong>Adjuvant Therapy:</strong> Stupp protocol (Concurrent RT + TMZ)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="explain-ai" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-wand-magic-sparkles text-purple"></i> Explainable AI (Grad-CAM Interpretability)</h3>
+                            <p>Grad-CAM attention heatmaps indicate 89% of model decision weight concentrated on hyperintense core boundary voxels at (x:128, y:142, z:78).</p>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="model-performance" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-microchip text-green"></i> Model Architecture & Benchmark Metrics</h3>
+                            <div class="sub-kpi-row my-3">
+                                <div class="sub-kpi"><span>Architecture</span><strong class="text-purple">MedGemma 3D U-Net</strong></div>
+                                <div class="sub-kpi"><span>Parameters</span><strong class="text-cyan">31.2M</strong></div>
+                                <div class="sub-kpi"><span>Inference Time</span><strong class="text-green">240 ms</strong></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 6: SEGMENTATION -->
+                <div class="page-view" id="page-segmentation">
+                    <div class="page-subnav-bar glass-card mb-3">
+                        <button class="page-subnav-btn active" data-page="segmentation" data-sub="tumor-core"><i class="fa-solid fa-circle-dot text-red"></i> Tumor Core</button>
+                        <button class="page-subnav-btn" data-page="segmentation" data-sub="edema"><i class="fa-solid fa-circle-dot text-green"></i> Edema</button>
+                        <button class="page-subnav-btn" data-page="segmentation" data-sub="enhancing-tumor"><i class="fa-solid fa-circle-dot text-amber"></i> Enhancing Tumor</button>
+                        <button class="page-subnav-btn" data-page="segmentation" data-sub="overlay-controls"><i class="fa-solid fa-layer-group"></i> Overlay Controls</button>
+                        <button class="page-subnav-btn" data-page="segmentation" data-sub="volume-analysis"><i class="fa-solid fa-cube"></i> Volume Analysis</button>
+                        <button class="page-subnav-btn" data-page="segmentation" data-sub="segmentation-metrics"><i class="fa-solid fa-chart-pie"></i> Metrics</button>
+                        <button class="page-subnav-btn" data-page="segmentation" data-sub="export-mask"><i class="fa-solid fa-download"></i> Export Mask</button>
+                    </div>
+
+                    <div class="sub-content-panel active" data-sub-panel="tumor-core">
+                        <div class="segmentation-studio-grid">
+                            <div class="seg-canvas-card glass-card">
+                                <div class="card-head">
+                                    <h3><i class="fa-solid fa-layer-group text-purple"></i> 3D U-Net Volumetric Segmentation Studio</h3>
+                                    <div class="v-tools">
+                                        <label><input type="checkbox" id="segOverlayToggle" checked> Mask Overlay</label>
+                                        <label><input type="checkbox" id="segOutlineToggle" checked> Outline</label>
+                                    </div>
+                                </div>
+                                <div class="seg-canvas-wrap">
+                                    <canvas id="canvasSegStudio" width="480" height="320"></canvas>
+                                </div>
+                                <div class="seg-controls-row">
+                                    <label>Mask Opacity: <input type="range" id="segOpacityRange" min="0" max="100" value="80"></label>
+                                    <button class="primary-btn sm-btn" onclick="showToast('Exporting mask PNG...','success')"><i class="fa-solid fa-download"></i> Export Mask PNG</button>
+                                    <button class="secondary-btn sm-btn" onclick="showToast('Downloading NIfTI mask...','success')"><i class="fa-solid fa-file-export"></i> Download NIfTI</button>
+                                </div>
+                            </div>
+                            <div class="seg-metrics-side glass-card">
+                                <h3>Region Breakdown & Volumetrics</h3>
+                                <div class="legend-list-large">
+                                    <div class="legend-item"><span class="legend-swatch red-swatch"></span><strong>🔴 Tumor Core (ET)</strong><span>18.4 cm³</span></div>
+                                    <div class="legend-item"><span class="legend-swatch green-swatch"></span><strong>🟢 Edema (ED)</strong><span>12.1 cm³</span></div>
+                                    <div class="legend-item"><span class="legend-swatch yellow-swatch"></span><strong>🟡 Necrotic Core (NCR)</strong><span>3.7 cm³</span></div>
+                                </div>
+                                <hr class="dropdown-divider">
+                                <div class="metrics-gauges-row">
+                                    <div class="m-gauge"><div class="m-val text-green">0.932</div><span>Dice Score</span></div>
+                                    <div class="m-gauge"><div class="m-val text-purple">0.874</div><span>IoU</span></div>
+                                    <div class="m-gauge"><div class="m-val text-cyan">0.948</div><span>Precision</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="edema" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-circle-dot text-green"></i> Edema Zone (ED) Volumetric Analysis</h3>
+                            <div class="sub-kpi-row my-3">
+                                <div class="sub-kpi"><span>Edema Volume</span><strong class="text-green">12.1 cm³</strong></div>
+                                <div class="sub-kpi"><span>Peritumoral Spread</span><strong class="text-amber">+1.8 cm margin</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="enhancing-tumor" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-circle-dot text-amber"></i> Enhancing Tumor (ET+) Region</h3>
+                            <div class="sub-kpi-row my-3">
+                                <div class="sub-kpi"><span>ET Volume</span><strong class="text-amber">14.6 cm³</strong></div>
+                                <div class="sub-kpi"><span>Contrast Retention</span><strong class="text-cyan">High (T1Gd)</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="overlay-controls" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-layer-group text-purple"></i> Segmentation Overlay Controls</h3>
+                            <div class="form-grid">
+                                <div class="form-group"><label>Overlay Opacity:</label><input type="range" min="0" max="100" value="80" oninput="showToast('Opacity: '+this.value+'%','info')"></div>
+                                <div class="form-group"><label>Show Region Outlines:</label><input type="checkbox" checked> <span>Active</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="volume-analysis" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-cube text-cyan"></i> 3D Volumetric Region Breakdown</h3>
+                            <div class="sub-kpi-row my-3">
+                                <div class="sub-kpi"><span>Total Volume</span><strong class="text-purple">34.2 cm³</strong></div>
+                                <div class="sub-kpi"><span>Tumor Core</span><strong class="text-red">18.4 cm³</strong></div>
+                                <div class="sub-kpi"><span>Edema Zone</span><strong class="text-green">12.1 cm³</strong></div>
+                                <div class="sub-kpi"><span>Necrosis</span><strong class="text-amber">3.7 cm³</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="segmentation-metrics" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-chart-pie text-green"></i> Segmentation Metrics & Model Precision</h3>
+                            <div class="sub-kpi-row my-3">
+                                <div class="sub-kpi"><span>Dice Coefficient</span><strong class="text-green">0.932</strong></div>
+                                <div class="sub-kpi"><span>IoU Score</span><strong class="text-purple">0.874</strong></div>
+                                <div class="sub-kpi"><span>Precision</span><strong class="text-cyan">0.948</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="export-mask" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-download text-green"></i> Export Segmentation Mask File</h3>
+                            <div class="quick-actions-row">
+                                <button class="action-btn" onclick="showToast('Exported Mask PNG','success')"><i class="fa-solid fa-image"></i> Export PNG</button>
+                                <button class="action-btn" onclick="showToast('Exported NIfTI Mask (.nii)','success')"><i class="fa-solid fa-cubes"></i> Export NIfTI</button>
+                                <button class="action-btn" onclick="showToast('Exported DICOM-SEG','success')"><i class="fa-solid fa-file-medical"></i> DICOM-SEG</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 7: COMPARISON -->
+                <div class="page-view" id="page-comparison">
+                    <div class="comparison-container glass-card">
+                        <div class="card-head">
+                            <h3><i class="fa-solid fa-sliders text-blue"></i> Longitudinal Side-by-Side Comparison Engine</h3>
+                            <span class="badge red-badge">TUMOR GROWTH: +10.3% (+3.2 cm³) across 75 days</span>
+                        </div>
+                        <div class="split-viewer-wrapper" id="splitViewerWrapper">
+                            <div class="split-image-panel left-panel">
+                                <span class="split-tag">PREVIOUS SCAN (May 19, 2026 - 31.0 cm³)</span>
+                                <canvas id="canvasPrevScan"></canvas>
+                            </div>
+                            <div class="split-image-panel right-panel" id="rightPanelSplit">
+                                <span class="split-tag purple-tag">CURRENT SCAN (Aug 02, 2026 - 34.2 cm³)</span>
+                                <canvas id="canvasCurrScan"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 8: REPORTS -->
+                <div class="page-view" id="page-reports">
+                    <div class="page-subnav-bar glass-card mb-3">
+                        <button class="page-subnav-btn active" data-page="reports" data-sub="completed-reports"><i class="fa-solid fa-circle-check"></i> Completed Reports</button>
+                        <button class="page-subnav-btn" data-page="reports" data-sub="generate-report"><i class="fa-solid fa-plus"></i> Generate Report</button>
+                        <button class="page-subnav-btn" data-page="reports" data-sub="draft-reports"><i class="fa-solid fa-pen"></i> Draft Reports (1)</button>
+                        <button class="page-subnav-btn" data-page="reports" data-sub="report-templates"><i class="fa-solid fa-copy"></i> Templates</button>
+                        <button class="page-subnav-btn" data-page="reports" data-sub="export-pdf"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+                        <button class="page-subnav-btn" data-page="reports" data-sub="share-report"><i class="fa-solid fa-share-nodes"></i> Share Report</button>
+                    </div>
+
+                    <!-- SUB-PANEL 1: COMPLETED REPORTS -->
+                    <div class="sub-content-panel active" data-sub-panel="completed-reports">
+                        <div class="report-wrapper glass-card">
+                            <div class="report-header">
+                                <div class="hospital-branding">
+                                    <i class="fa-solid fa-hospital fa-2x"></i>
+                                    <div>
+                                        <h2>JOHNS HOPKINS MEDICINE</h2>
+                                        <p>DEPARTMENT OF NEURORADIOLOGY & MEDICAL AI</p>
+                                    </div>
+                                </div>
+                                <div class="report-meta">
+                                    <h3>CONFIDENTIAL RADIOLOGY REPORT</h3>
+                                    <p>Report Date: Aug 05, 2026 • Accession #JH-8942-MRI</p>
+                                </div>
+                            </div>
+                            <hr class="report-hr">
+                            <div class="report-section">
+                                <h4><i class="fa-solid fa-brain"></i> RADIOLOGIC FINDINGS & AI ANALYSIS</h4>
+                                <p>Multi-planar 3T MRI sequences demonstrate a well-defined hyperintense space-occupying intra-axial mass located within the <strong>Left Temporal-Parietal Lobe</strong>. Total measured volume is <strong>34.2 cm³</strong> (Dice score: 0.932).</p>
+                            </div>
+                            <div class="report-footer-actions">
+                                <button class="primary-btn glow-btn" id="printReportBtn"><i class="fa-solid fa-print"></i> Print Report</button>
+                                <button class="secondary-btn" onclick="activateSubView('reports','export-pdf','Export PDF')"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+                                <button class="secondary-btn" onclick="showToast('Exported report JSON schema','success')"><i class="fa-solid fa-code"></i> Export JSON</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-PANEL 2: GENERATE REPORT -->
+                    <div class="sub-content-panel" data-sub-panel="generate-report" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-plus text-cyan"></i> Generate New Radiology Report</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Select Patient & Scan:</label>
+                                    <select class="compact-select">
+                                        <option value="P-8942">Emily Jackson (P-8942) - 34.2 cm³ GBM</option>
+                                        <option value="P-8943">Sarah Jenkins (P-8943) - 18.6 cm³ Astrocytoma</option>
+                                        <option value="P-8944">David Miller (P-8944) - Normal Scan</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Radiologist Clinical Findings:</label>
+                                    <textarea class="compact-textarea" rows="3" placeholder="Enter clinical observations...">Multi-planar 3T MRI sequences demonstrate a hyperintense mass in Left Temporal-Parietal Lobe. Total volume 34.2 cm³.</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>AI Co-Pilot Auto Findings:</label>
+                                    <button class="secondary-btn sm-btn" onclick="showToast('MedGemma AI findings auto-filled!','success')"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Fill MedGemma Summary</button>
+                                </div>
+                                <button class="primary-btn glow-btn" onclick="showToast('New report generated & saved!','success')"><i class="fa-solid fa-file-signature"></i> Finalize & Sign Radiology Report</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-PANEL 3: DRAFT REPORTS -->
+                    <div class="sub-content-panel" data-sub-panel="draft-reports" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-pen text-amber"></i> Pending Draft Reports (1)</h3>
+                            <table class="full-table">
+                                <thead><tr><th>Draft ID</th><th>Patient Name</th><th>Last Saved</th><th>Radiologist</th><th>Status</th><th>Actions</th></tr></thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="mono">DRAFT-8942</td><td><strong>Emily Jackson</strong></td><td>Today, 11:20 AM</td><td>Dr. Eleanor Vance</td><td><span class="badge yellow-badge">PENDING REVIEW</span></td>
+                                        <td><button class="primary-btn xs-btn" onclick="activateSubView('reports','generate-report','Generate Report')">Edit</button><button class="secondary-btn xs-btn" onclick="showToast('Draft signed!','success')">Sign</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- SUB-PANEL 4: REPORT TEMPLATES -->
+                    <div class="sub-content-panel" data-sub-panel="report-templates" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-copy text-purple"></i> Radiology Report Templates Library</h3>
+                            <div class="template-grid">
+                                <div class="template-card glass-card">
+                                    <h4>Standard Neuroradiology Report</h4>
+                                    <p>Comprehensive structured format for brain MRI FLAIR/T2 evaluations.</p>
+                                    <button class="secondary-btn sm-btn" onclick="showToast('Standard Template selected','info')">Use Template</button>
+                                </div>
+                                <div class="template-card glass-card">
+                                    <h4>GBM Emergency Triage Template</h4>
+                                    <p>Accelerated high-grade neoplasm urgent surgical alert template.</p>
+                                    <button class="secondary-btn sm-btn" onclick="showToast('Emergency Template selected','info')">Use Template</button>
+                                </div>
+                                <div class="template-card glass-card">
+                                    <h4>Longitudinal Follow-Up Template</h4>
+                                    <p>Designed for multi-scan progression and chemotherapy response tracking.</p>
+                                    <button class="secondary-btn sm-btn" onclick="showToast('Longitudinal Template selected','info')">Use Template</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-PANEL 5: EXPORT PDF -->
+                    <div class="sub-content-panel" data-sub-panel="export-pdf" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-file-pdf text-red"></i> Export Report as PDF Document</h3>
+                            <div class="form-grid">
+                                <div class="form-group"><label>Page Orientation:</label><select class="compact-select"><option>Portrait</option><option>Landscape</option></select></div>
+                                <div class="form-group"><label>Include High-Res MRI Images:</label><input type="checkbox" checked> <span>Embed 3D Slices</span></div>
+                                <div class="form-group"><label>HIPAA Watermark:</label><input type="checkbox" checked> <span>Include Confidential Watermark</span></div>
+                                <button class="primary-btn glow-btn" onclick="showToast('Downloading Radiology_Report_P8942.pdf...','success')"><i class="fa-solid fa-download"></i> Download PDF Report</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-PANEL 6: SHARE REPORT -->
+                    <div class="sub-content-panel" data-sub-panel="share-report" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-share-nodes text-cyan"></i> Secure Share Radiology Report</h3>
+                            <div class="form-grid">
+                                <div class="form-group"><label>Recipient Email:</label><input type="email" class="compact-input" placeholder="colleague@jhmi.edu"></div>
+                                <div class="form-group"><label>Access Permissions:</label><select class="compact-select"><option>Read-Only View</option><option>Can Add Clinical Comments</option><option>Full Attending Access</option></select></div>
+                                <div class="form-group"><label>Link Expiration:</label><select class="compact-select"><option>24 Hours</option><option>7 Days</option><option>30 Days</option></select></div>
+                                <button class="primary-btn glow-btn" onclick="showToast('Encrypted report link sent to recipient!','success')"><i class="fa-solid fa-paper-plane"></i> Send Encrypted Link</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 9: HISTORY -->
+                <div class="page-view" id="page-history">
+                    <div class="page-subnav-bar glass-card mb-3">
+                        <button class="page-subnav-btn active" data-page="history" data-sub="scan-history"><i class="fa-solid fa-x-ray"></i> Scan History</button>
+                        <button class="page-subnav-btn" data-page="history" data-sub="ai-analysis-history"><i class="fa-solid fa-brain"></i> AI Analysis History</button>
+                        <button class="page-subnav-btn" data-page="history" data-sub="report-history"><i class="fa-solid fa-file-invoice"></i> Report History</button>
+                        <button class="page-subnav-btn" data-page="history" data-sub="downloads"><i class="fa-solid fa-download"></i> Downloads</button>
+                        <button class="page-subnav-btn" data-page="history" data-sub="activity-logs"><i class="fa-solid fa-list text-cyan"></i> Activity Logs</button>
+                        <button class="page-subnav-btn" data-page="history" data-sub="audit-trail"><i class="fa-solid fa-shield-halved"></i> Audit Trail</button>
+                    </div>
+
+                    <div class="sub-content-panel active" data-sub-panel="scan-history">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-x-ray text-cyan"></i> Loaded Scan History Log</h3>
+                            <table class="full-table">
+                                <thead><tr><th>Scan Accession</th><th>Patient</th><th>Modality</th><th>Loaded At</th><th>Action</th></tr></thead>
+                                <tbody>
+                                    <tr><td class="mono">JH-8942-MRI</td><td>Emily Jackson</td><td>3T FLAIR T2</td><td>Today, 14:52</td><td><button class="primary-btn xs-btn" data-nav="workstation">Open Scan</button></td></tr>
+                                    <tr><td class="mono">JH-8943-MRI</td><td>Sarah Jenkins</td><td>3T FLAIR T2</td><td>Today, 12:15</td><td><button class="secondary-btn xs-btn" data-nav="workstation">Open Scan</button></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="ai-analysis-history" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-brain text-purple"></i> AI Analysis Execution Log</h3>
+                            <table class="full-table">
+                                <thead><tr><th>Execution ID</th><th>Patient</th><th>Model</th><th>Inference Time</th><th>Neoplasm Result</th></tr></thead>
+                                <tbody>
+                                    <tr><td class="mono">RUN-9402</td><td>Emily Jackson</td><td>MedGemma 3D U-Net v2.4</td><td>240 ms</td><td><span class="badge red-badge">34.2 cm³ (CRITICAL)</span></td></tr>
+                                    <tr><td class="mono">RUN-9401</td><td>Sarah Jenkins</td><td>MedGemma 3D U-Net v2.4</td><td>235 ms</td><td><span class="badge yellow-badge">18.6 cm³ (HIGH RISK)</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="report-history" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-file-invoice text-cyan"></i> Radiology Report Archive</h3>
+                            <div class="sub-panel-list">
+                                <div class="sub-list-item"><i class="fa-solid fa-file-pdf text-red"></i> <strong>JH-8942-MRI:</strong> Emily Jackson — Signed Aug 05, 2026 by Dr. Vance</div>
+                                <div class="sub-list-item"><i class="fa-solid fa-file-pdf text-red"></i> <strong>JH-8943-MRI:</strong> Sarah Jenkins — Signed Aug 03, 2026 by Dr. Thorne</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="downloads" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-download text-green"></i> Downloaded Export Files</h3>
+                            <div class="sub-panel-list">
+                                <div class="sub-list-item"><i class="fa-solid fa-cubes text-purple"></i> <strong>BraTS20_001_mask.nii.gz</strong> — 4.8 MB — Downloaded Aug 05</div>
+                                <div class="sub-list-item"><i class="fa-solid fa-file-pdf text-red"></i> <strong>Radiology_Report_P8942.pdf</strong> — 1.2 MB — Downloaded Aug 05</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="activity-logs" style="display:none;">
+                        <div class="history-page-card glass-card">
+                            <h3><i class="fa-solid fa-clock-rotate-left text-cyan"></i> User Activity Log</h3>
+                            <div class="history-timeline-full">
+                                <div class="h-event"><span class="h-time">Today, 14:52</span><strong>Critical Neoplasm Alert</strong> generated for Scan P-8942 (34.2 cm³).</div>
+                                <div class="h-event"><span class="h-time">Today, 14:30</span><strong>U-Net Segmentation Mask</strong> exported by Dr. Eleanor Vance.</div>
+                                <div class="h-event"><span class="h-time">Today, 12:15</span><strong>New MRI Scan Uploaded</strong> for Patient P-8943 (FLAIR Sequence).</div>
+                                <div class="h-event"><span class="h-time">Yesterday, 17:40</span><strong>Radiology Diagnostic Report</strong> generated for P-8944.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-content-panel" data-sub-panel="audit-trail" style="display:none;">
+                        <div class="glass-card page-card">
+                            <h3><i class="fa-solid fa-shield-halved text-amber"></i> HIPAA Compliance Audit Trail</h3>
+                            <div class="sub-panel-list">
+                                <div class="sub-list-item"><i class="fa-solid fa-shield-check text-green"></i> <strong>14:52 UTC:</strong> Report signed & saved by Dr. Eleanor Vance (ID: EV-8891)</div>
+                                <div class="sub-list-item"><i class="fa-solid fa-eye text-cyan"></i> <strong>14:30 UTC:</strong> Patient P-8942 MRI scan data accessed from PACS</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 10: SETTINGS -->
+                <div class="page-view" id="page-settings">
+                    <div class="settings-card glass-card">
+                        <div class="settings-tabs-row">
+                            <button class="tab-btn active" data-page="settings" data-sub="general">General</button>
+                            <button class="tab-btn" data-page="settings" data-sub="appearance">Appearance</button>
+                            <button class="tab-btn" data-page="settings" data-sub="notifications">Notifications</button>
+                            <button class="tab-btn" data-page="settings" data-sub="security">Security</button>
+                            <button class="tab-btn" data-page="settings" data-sub="ai-models">AI Models</button>
+                            <button class="tab-btn" data-page="settings" data-sub="hospital-config">Hospital Config</button>
+                            <button class="tab-btn" data-page="settings" data-sub="keyboard-shortcuts">Shortcuts</button>
+                            <button class="tab-btn" data-page="settings" data-sub="about">About</button>
+                        </div>
+                        
+                        <div class="sub-content-panel active" data-sub-panel="general">
+                            <div class="settings-body">
+                                <div class="set-row"><label>Hospital Name:</label><input type="text" class="compact-input" value="Johns Hopkins Hospital"></div>
+                                <div class="set-row"><label>Department:</label><input type="text" class="compact-input" value="Neuroradiology & Medical AI"></div>
+                                <div class="set-row"><label>Default MRI Sequence:</label><select class="compact-select"><option>3T FLAIR T2-Weighted</option><option>T1-Contrast (T1Gd)</option></select></div>
+                                <button class="primary-btn sm-btn mt-3" onclick="showToast('General settings saved!','success')"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                            </div>
+                        </div>
+
+                        <div class="sub-content-panel" data-sub-panel="appearance" style="display:none;">
+                            <div class="settings-body">
+                                <div class="set-row"><label>Theme Mode:</label><select class="compact-select" onchange="document.documentElement.setAttribute('data-theme',this.value);showToast('Theme set to '+this.value,'info')"><option value="dark">Dark Mode</option><option value="light">Light Mode</option></select></div>
+                                <div class="set-row"><label>Interface Scaling:</label><select class="compact-select"><option>Standard (100%)</option><option>Compact (90%)</option><option>Large (110%)</option></select></div>
+                                <button class="primary-btn sm-btn mt-3" onclick="showToast('Appearance settings saved!','success')"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                            </div>
+                        </div>
+
+                        <div class="sub-content-panel" data-sub-panel="notifications" style="display:none;">
+                            <div class="settings-body">
+                                <div class="set-row"><label>Critical Neoplasm Audio Alert:</label><input type="checkbox" checked> <span>Play Audio Chime</span></div>
+                                <div class="set-row"><label>High Risk Banner Alerts:</label><input type="checkbox" checked> <span>Show Toast Notification</span></div>
+                                <button class="primary-btn sm-btn mt-3" onclick="showToast('Notification preferences saved!','success')"><i class="fa-solid fa-floppy-disk"></i> Save Preferences</button>
+                            </div>
+                        </div>
+
+                        <div class="sub-content-panel" data-sub-panel="security" style="display:none;">
+                            <div class="settings-body">
+                                <div class="set-row"><label>Two-Factor Auth (2FA):</label><input type="checkbox" checked> <span>Active</span></div>
+                                <div class="set-row"><label>Inactivity Auto-Lock:</label><select class="compact-select"><option>15 Minutes</option><option selected>30 Minutes</option><option>60 Minutes</option></select></div>
+                                <div class="set-row"><label>HIPAA Audit Logging:</label><input type="checkbox" checked> <span>Enforced</span></div>
+                                <button class="primary-btn sm-btn mt-3" onclick="showToast('Security settings updated!','success')"><i class="fa-solid fa-shield-check"></i> Update Security</button>
+                            </div>
+                        </div>
+
+                        <div class="sub-content-panel" data-sub-panel="ai-models" style="display:none;">
+                            <div class="settings-body">
+                                <div class="set-row"><label>AI Inference Model:</label><input type="text" class="compact-input" value="MedGemma 3D U-Net v2.4 (31.2M params)" readonly></div>
+                                <div class="set-row"><label>Execution Hardware:</label><select class="compact-select"><option value="gpu">NVIDIA A100 GPU (TensorRT FP16)</option><option value="cpu">CPU Fallback Engine</option></select></div>
+                                <button class="primary-btn sm-btn mt-3" onclick="showToast('AI hardware configured!','success')"><i class="fa-solid fa-microchip"></i> Save Model Config</button>
+                            </div>
+                        </div>
+
+                        <div class="sub-content-panel" data-sub-panel="hospital-config" style="display:none;">
+                            <div class="settings-body">
+                                <div class="set-row"><label>PACS Host IP:</label><input type="text" class="compact-input" value="10.42.0.100"></div>
+                                <div class="set-row"><label>DICOM AE Title:</label><input type="text" class="compact-input" value="MEDGEMMA_PACS"></div>
+                                <div class="set-row"><label>DICOM Port:</label><input type="number" class="compact-input" value="4242"></div>
+                                <button class="primary-btn sm-btn mt-3" onclick="showToast('PACS Connection Configured!','success')"><i class="fa-solid fa-network-wired"></i> Test & Save PACS</button>
+                            </div>
+                        </div>
+
+                        <div class="sub-content-panel" data-sub-panel="keyboard-shortcuts" style="display:none;">
+                            <div class="sub-panel-list">
+                                <div class="sub-list-item"><kbd>Ctrl+1</kbd> → Dashboard</div>
+                                <div class="sub-list-item"><kbd>Ctrl+2</kbd> → MRI Workspace</div>
+                                <div class="sub-list-item"><kbd>Ctrl+3</kbd> → Patients</div>
+                                <div class="sub-list-item"><kbd>Ctrl+4</kbd> → AI Analysis</div>
+                                <div class="sub-list-item"><kbd>Ctrl+5</kbd> → Reports</div>
+                                <div class="sub-list-item"><kbd>Ctrl+B</kbd> → Toggle Sidebar</div>
+                                <div class="sub-list-item"><kbd>Ctrl+K</kbd> → Search Workspaces</div>
+                            </div>
+                        </div>
+
+                        <div class="sub-content-panel" data-sub-panel="about" style="display:none;">
+                            <div class="settings-body">
+                                <p><strong>MedGemma AI Enterprise Radiology Workstation v2.4.1</strong></p>
+                                <p style="color:var(--text-muted); font-size:0.85rem;">Powered by PyTorch, Flask, and Google MedGemma 3D U-Net Architecture.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div> <!-- /page-container -->
+        </main>
+    </div> <!-- /app-layout -->
+
+    <!-- TOAST NOTIFICATION -->
+    <div class="toast-notification" id="toast"></div>
+
+    <!-- Application Script -->
+    <script src="/static/script.js?v=2.4.2"></script>
+</body>
+
+</html>
